@@ -3,6 +3,11 @@
 #define KYEL  "\x1B[33m"
 #define KWHT  "\x1B[37m"
 
+void unexpectedNewLine(int lineNumber){
+    printf("%sERROR: unexpected '\\n' at line %d\n", KYEL, lineNumber);
+    printf("%s", KWHT);
+}
+
 void unexpectedEOF(int lineNumber){
     printf("%sERROR: unexpected EOF at line %d\n", KYEL, lineNumber);
     printf("%s", KWHT);

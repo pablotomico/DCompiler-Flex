@@ -1,3 +1,5 @@
+/**
+*/
 import std.stdio;
 import std.algorithm.iteration;
 import std.exception;
@@ -43,3 +45,6 @@ void main()
     a = /+ "+/" +/ 1";
     a = /+ /* +/ *2/ 3;
 }
+
+"asdasd
+"

@@ -1,9 +1,9 @@
 #include "symbolTable.h"
 #include "scanner.h"
 #include "util/lexDefinitions.h"
-#include "lexicAnalysisFunctions.h"
 #include "errorManager.h"
 #include "lex.yy.c"
+
 #define FILE_PATH "/home/pablo/GitProjects/DCompiler-Flex/DCompiler-Flex/regression.d"
 
 
@@ -16,7 +16,6 @@ typedef struct {
     char *lexem;
     int component;
 } lex;
-
 
 
 void initLexAnalyzer(lexAnalyzer *la) {
@@ -43,31 +42,20 @@ lex getNextComponent(lexAnalyzer *la) {
 
     //TODO identifiers
 
-    if(l.component == STRING || l.component == DOCCOMMENT){
-        while (buffer[i] != '\0'){
-            i++;
-        }
-        l.lexem = (char *) malloc ((i + 1) * sizeof(char));
-        strcpy(l.lexem, buffer);
-        l.lexem[i] = '\0';
-    }else{
-        while (*(yytext + i) != '\0'){
-            i++;
-        }
-        l.lexem = (char *) malloc ((i + 1) * sizeof(char));
-        strcpy(l.lexem, yytext);
-        l.lexem[i] = '\0';
 
-        if(l.component == IDENTIFIER){
-            if ((l.component = getComponentByLexem((*la)->st, l.lexem)) == 0) {
-                l.component = IDENTIFIER;
-                addLexem(&((*la)->st), l.lexem, l.component);
-            }
+    while (*(yytext + i) != '\0') {
+        i++;
+    }
+    l.lexem = (char *) malloc((i + 1) * sizeof(char));
+    strcpy(l.lexem, yytext);
+    l.lexem[i] = '\0';
+
+    if (l.component == IDENTIFIER) {
+        if ((l.component = getComponentByLexem((*la)->st, l.lexem)) == 0) {
+            l.component = IDENTIFIER;
+            addLexem(&((*la)->st), l.lexem, l.component);
         }
     }
-
-
-
 
     return l;
 }

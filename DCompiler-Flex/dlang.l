@@ -6,12 +6,6 @@
 #include "errorManager.h"
 
 int n_line = 1;
-char buffer[512];
-char buffer_pos = 0;
-
-void add_to_buffer(char c);
-void return_buffer();
-
 
 %}
     /*===== DEFINITIONS =====*/
@@ -24,7 +18,10 @@ NumberInitialChar       [[:digit:]]
 BinaryChar              [01_]
 StringLiteralInitialChar    \"
 
-
+%x S_MULTILINE_COMMENT
+%x S_DOCUMENTATION_COMMENT
+%x S_NESTED_COMMENT
+%x S_STRING_LITERAL
 
 %%
     /*===== RULES =====*/
@@ -37,96 +34,45 @@ StringLiteralInitialChar    \"
 {IdentifierInitialChar}{IdentifierChar}*                                return(IDENTIFIER);
 
     /*STRING LITERALS*/
-{StringLiteralInitialChar}                                              {
-                                                                            add_to_buffer('"');
-                                                                            char c = input();
-                                                                            add_to_buffer(c);
-                                                                            while(c != '"'){
-                                                                                if(c == '\n') n_line++;
-                                                                                if(c == '\\')c = input();
-                                                                                c = input();
-                                                                                add_to_buffer(c);
-                                                                            }
-                                                                            return_buffer();
-                                                                            return(STRING);
-                                                                        }
+{StringLiteralInitialChar}                                              BEGIN(S_STRING_LITERAL);yymore();
+<S_STRING_LITERAL>\n                                                    BEGIN(INITIAL);unexpectedNewLine(n_line);
+<S_STRING_LITERAL>{StringLiteralInitialChar}                            BEGIN(INITIAL);return(STRING);
+<S_STRING_LITERAL><<EOF>>                                               BEGIN(INITIAL);unexpectedEOF(n_line);yyrestart(yyin);
+<S_STRING_LITERAL>.                                                     yymore();
+
 
     /*LINE COMMENT*/
 "//".*\n                                                                n_line++;
 
     /*MULTILINE COMMENTS*/
-"/*"                                                                    {
-                                                                            char c;
-                                                                            int check = 1;
-                                                                            while(check > 0){
-                                                                                while((c = input()) != '*' && c != EOF){
-                                                                                    if(c == '\n') n_line++;
-                                                                                }
+"/*"                                                                    BEGIN(S_MULTILINE_COMMENT);
+<S_MULTILINE_COMMENT>\n                                                 n_line++;
+<S_MULTILINE_COMMENT>"*/"                                               BEGIN(INITIAL);
+<S_MULTILINE_COMMENT><<EOF>>                                            BEGIN(INITIAL);unexpectedEOF(n_line);
+<S_MULTILINE_COMMENT>.
 
-                                                                                if(c == '*'){
-                                                                                     while((c = input()) == '*');
-                                                                                     if(c == '/') check = 0;
-                                                                                }
 
-                                                                                if(c == EOF) unexpectedEOF(n_line);
-                                                                            }
-
-                                                                        }
     /*DOCUMENTATION COMMENTS*/
-"/**"[^/]                                                               {
-                                                                            add_to_buffer('/');
-                                                                            add_to_buffer('*');
-                                                                            add_to_buffer('*');
-                                                                            add_to_buffer(' ');
-                                                                            char c;
-                                                                            while(1){
-                                                                                while((c = input()) != '*' && c != EOF){
-                                                                                    add_to_buffer(c);
-                                                                                    if(c == '\n') {
-                                                                                        n_line++;
-                                                                                    }
-                                                                                }
-
-                                                                                if(c == '*'){
-                                                                                     add_to_buffer(c);
-                                                                                     while((c = input()) == '*') add_to_buffer(c);;
-                                                                                     if(c == '/') {
-                                                                                        add_to_buffer(c);
-                                                                                        return_buffer();
-                                                                                        return(DOCCOMMENT);
-                                                                                     }
-                                                                                }
-
-                                                                                if(c == EOF) unexpectedEOF(n_line);
-                                                                            }
-                                                                        }
+"/**"\n                                                                 BEGIN(S_DOCUMENTATION_COMMENT);yymore();n_line++;
+"/**"[^/]                                                               BEGIN(S_DOCUMENTATION_COMMENT);yymore();
+<S_DOCUMENTATION_COMMENT>\n                                             yymore();n_line++;
+<S_DOCUMENTATION_COMMENT>"*/"                                           BEGIN(INITIAL);return(DOCCOMMENT);
+<S_DOCUMENTATION_COMMENT><<EOF>>                                        BEGIN(INITIAL);unexpectedEOF(n_line);yyrestart(yyin);
+<S_DOCUMENTATION_COMMENT>.                                              yymore();
 
     /*NESTED COMMENTS*/
-"/+"                                                                    {
-                                                                            int nested_count = 1;
-                                                                            char c;
-                                                                            while(nested_count > 0){
-                                                                                while((c = input()) != '+' && c != EOF){
-                                                                                    if(c == '\n') n_line++;
-                                                                                    if(c == '/'){
-                                                                                        while((c = input()) == '/');
-                                                                                        if(c == '+') {
-                                                                                            nested_count++;
-                                                                                        }
-                                                                                    }
-                                                                                }
-
-                                                                                if(c == '+'){
-                                                                                     while((c = input()) == '+');
-                                                                                     if(c == '/'){
-                                                                                        nested_count--;
-                                                                                     }
-                                                                                }
-
-                                                                                if(c == EOF) unexpectedEOF(n_line);
+"/+"                                                                    BEGIN(S_NESTED_COMMENT);int nested_count=1;
+<S_NESTED_COMMENT>\n                                                    n_line++;
+<S_NESTED_COMMENT>"/+"                                                  nested_count++;
+<S_NESTED_COMMENT>"+/"                                                  {
+                                                                            nested_count--;
+                                                                            if(nested_count == 0){
+                                                                                BEGIN(INITIAL);
                                                                             }
-
                                                                         }
+<S_NESTED_COMMENT><<EOF>>                                               BEGIN(INITIAL);unexpectedEOF(n_line);
+<S_NESTED_COMMENT>.
+
 
     /*OPERATORS*/
 "+"     return('+');
@@ -174,15 +120,4 @@ StringLiteralInitialChar    \"
 {TrashChar}
 <<EOF>> return(EOF);
 .
-
 %%
-
-void add_to_buffer(char c){
-    buffer[buffer_pos] = c;
-    buffer_pos++;
-}
-
-void return_buffer(){
-    buffer[buffer_pos] = '\0';
-    buffer_pos = 0;
-}

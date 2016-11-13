@@ -3,6 +3,7 @@
 
 #endif //DCOMPILER_ERRORMANAGER_H
 
+void unexpectedNewLine(int lineNumber);
 
 void unexpectedEOF(int lineNumber);
 
