@@ -25,7 +25,7 @@ StringLiteralInitialChar    \"
 %x S_STRING_LITERAL
 
 %%
-    /*===== RULES =====*/
+    /*======== RULES ========*/
 
 {NumberInitialChar}{NumberChar}*                                        return(INTEGER);
 {NumberInitialChar}{NumberChar}*[\.]{NumberChar}                        return(FLOAT);

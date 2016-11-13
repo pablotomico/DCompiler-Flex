@@ -798,7 +798,7 @@ YY_DECL
 	{
 #line 27 "dlang.l"
 
-    /*===== RULES =====*/
+    /*======== RULES ========*/
 
 #line 804 "lex.yy.c"
 
