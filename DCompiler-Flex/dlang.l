@@ -31,7 +31,7 @@ StringLiteralInitialChar    \"
 
 {NumberInitialChar}{NumberChar}*                                        return(INTEGER);
 {NumberInitialChar}{NumberChar}*[\.]{NumberChar}                        return(FLOAT);
-{NumberInitialChar}{NumberChar}*[\.]{NumberChar}[eE][+-]?{NumberChar}+  return(SCIENTIFIC);
+{NumberInitialChar}{NumberChar}*([\.]{NumberChar}*)?[eE][+-]?{NumberChar}+  return(SCIENTIFIC);
 0[bB]{BinaryChar}+                                                      return(BINARY);
 
 {IdentifierInitialChar}{IdentifierChar}*                                return(IDENTIFIER);

@@ -49,12 +49,21 @@ lex getNextComponent(lexAnalyzer *la) {
         }
         l.lexem = (char *) malloc ((i + 1) * sizeof(char));
         strcpy(l.lexem, buffer);
+        l.lexem[i] = '\0';
     }else{
         while (*(yytext + i) != '\0'){
             i++;
         }
         l.lexem = (char *) malloc ((i + 1) * sizeof(char));
         strcpy(l.lexem, yytext);
+        l.lexem[i] = '\0';
+
+        if(l.component == IDENTIFIER){
+            if ((l.component = getComponentByLexem((*la)->st, l.lexem)) == 0) {
+                l.component = IDENTIFIER;
+                addLexem(&((*la)->st), l.lexem, l.component);
+            }
+        }
     }
 
 
