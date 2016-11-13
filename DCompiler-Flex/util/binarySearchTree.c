@@ -96,6 +96,7 @@ void printTree(tree t) {
     }
 
     if (t->data != NULL) {
+        if(t->component == 400)
         printf("      %3d  --> %s\n", t->component, t->data);
     }
 

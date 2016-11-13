@@ -3,6 +3,8 @@
 
 #endif //DCOMPILER_ERRORMANAGER_H
 
+void illegalEscapeSequence(int lineNumber);
+
 void unexpectedNewLine(int lineNumber);
 
 void unexpectedEOF(int lineNumber);

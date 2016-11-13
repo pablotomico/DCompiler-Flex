@@ -3,6 +3,11 @@
 #define KYEL  "\x1B[33m"
 #define KWHT  "\x1B[37m"
 
+void illegalEscapeSequence(int lineNumber){
+    printf("%sERROR: illegal scape sequence at line %d\n", KYEL, lineNumber);
+    printf("%s", KWHT);
+}
+
 void unexpectedNewLine(int lineNumber){
     printf("%sERROR: unexpected '\\n' at line %d\n", KYEL, lineNumber);
     printf("%s", KWHT);

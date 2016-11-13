@@ -6,6 +6,7 @@
 #include "errorManager.h"
 
 int n_line = 1;
+int nested_count=0;
 
 %}
     /*===== DEFINITIONS =====*/
@@ -30,7 +31,6 @@ StringLiteralInitialChar    \"
 {NumberInitialChar}{NumberChar}*[\.]{NumberChar}                        return(FLOAT);
 {NumberInitialChar}{NumberChar}*([\.]{NumberChar}*)?[eE][+-]?{NumberChar}+  return(SCIENTIFIC);
 0[bB]{BinaryChar}+                                                      return(BINARY);
-
 {IdentifierInitialChar}{IdentifierChar}*                                return(IDENTIFIER);
 
     /*STRING LITERALS*/
@@ -38,7 +38,21 @@ StringLiteralInitialChar    \"
 <S_STRING_LITERAL>\n                                                    BEGIN(INITIAL);unexpectedNewLine(n_line);
 <S_STRING_LITERAL>{StringLiteralInitialChar}                            BEGIN(INITIAL);return(STRING);
 <S_STRING_LITERAL><<EOF>>                                               BEGIN(INITIAL);unexpectedEOF(n_line);yyrestart(yyin);
+<S_STRING_LITERAL>\\\'                                                  |
+<S_STRING_LITERAL>\\\?                                                  |
+<S_STRING_LITERAL>\\\\                                                  |
+<S_STRING_LITERAL>\\0                                                   |
+<S_STRING_LITERAL>\\a                                                   |
+<S_STRING_LITERAL>\\b                                                   |
+<S_STRING_LITERAL>\\f                                                   |
+<S_STRING_LITERAL>\\n                                                   |
+<S_STRING_LITERAL>\\r                                                   |
+<S_STRING_LITERAL>\\t                                                   |
+<S_STRING_LITERAL>\\v                                                   |
+<S_STRING_LITERAL>\\\"                                                  yymore();
+<S_STRING_LITERAL>\\.                                                   BEGIN(INITIAL);illegalEscapeSequence(n_line);
 <S_STRING_LITERAL>.                                                     yymore();
+
 
 
     /*LINE COMMENT*/
@@ -61,7 +75,7 @@ StringLiteralInitialChar    \"
 <S_DOCUMENTATION_COMMENT>.                                              yymore();
 
     /*NESTED COMMENTS*/
-"/+"                                                                    BEGIN(S_NESTED_COMMENT);int nested_count=1;
+"/+"                                                                    BEGIN(S_NESTED_COMMENT);nested_count++;
 <S_NESTED_COMMENT>\n                                                    n_line++;
 <S_NESTED_COMMENT>"/+"                                                  nested_count++;
 <S_NESTED_COMMENT>"+/"                                                  {
