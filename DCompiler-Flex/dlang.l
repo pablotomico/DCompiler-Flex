@@ -11,14 +11,15 @@ int nested_count=0;
 %}
     /*===== DEFINITIONS =====*/
 
-IdentifierChar          [_[:alpha:][:digit:]]
-IdentifierInitialChar   [_[:alpha:]]
-TrashChar               [ \t\v\f]
-NumberChar              [[:digit:]_]
-NumberInitialChar       [[:digit:]]
-BinaryChar              [01_]
+IdentifierChar              [_[:alpha:][:digit:]]
+IdentifierInitialChar       [_[:alpha:]]
+TrashChar                   [ \t\v\f]
+NumberChar                  [[:digit:]_]
+NumberInitialChar           [[:digit:]]
+BinaryChar                  [01_]
 StringLiteralInitialChar    \"
 
+    /*START CONDITIONS*/
 %x S_MULTILINE_COMMENT
 %x S_DOCUMENTATION_COMMENT
 %x S_NESTED_COMMENT
@@ -28,14 +29,14 @@ StringLiteralInitialChar    \"
     /*======== RULES ========*/
 
 {NumberInitialChar}{NumberChar}*                                        return(INTEGER);
-{NumberInitialChar}{NumberChar}*[\.]{NumberChar}                        return(FLOAT);
+{NumberInitialChar}{NumberChar}*[\.]{NumberChar}*                        return(FLOAT);
 {NumberInitialChar}{NumberChar}*([\.]{NumberChar}*)?[eE][+-]?{NumberChar}+  return(SCIENTIFIC);
 0[bB]{BinaryChar}+                                                      return(BINARY);
 {IdentifierInitialChar}{IdentifierChar}*                                return(IDENTIFIER);
 
     /*STRING LITERALS*/
 {StringLiteralInitialChar}                                              BEGIN(S_STRING_LITERAL);yymore();
-<S_STRING_LITERAL>\n                                                    BEGIN(INITIAL);unexpectedNewLine(n_line);
+<S_STRING_LITERAL>\n                                                    BEGIN(INITIAL);unexpectedEndOfLine(n_line);
 <S_STRING_LITERAL>{StringLiteralInitialChar}                            BEGIN(INITIAL);return(STRING);
 <S_STRING_LITERAL><<EOF>>                                               BEGIN(INITIAL);unexpectedEOF(n_line);yyrestart(yyin);
 <S_STRING_LITERAL>\\\'                                                  |
@@ -94,6 +95,8 @@ StringLiteralInitialChar    \"
 "*"     return('*');
 "/"     return('/');
 "^"     return('^');
+">"     return('>');
+"<"     return('<');
 "."     return('.');
 ","     return(',');
 ";"     return(';');
@@ -133,5 +136,5 @@ StringLiteralInitialChar    \"
 \n     n_line++;
 {TrashChar}
 <<EOF>> return(EOF);
-.
+.   unknownComponent(n_line);
 %%

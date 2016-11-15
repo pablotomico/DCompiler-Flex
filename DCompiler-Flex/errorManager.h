@@ -5,12 +5,14 @@
 
 void illegalEscapeSequence(int lineNumber);
 
-void unexpectedNewLine(int lineNumber);
+void unexpectedEndOfLine(int lineNumber);
 
 void unexpectedEOF(int lineNumber);
 
 void malformedBinary(int lineNumber, char* number);
 
 void malformedScientific(int lineNumber, char* number);
+
+void unknownComponent(int lineNumber);
 
 void fatalError(char* msg);

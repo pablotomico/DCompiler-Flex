@@ -8,7 +8,7 @@ void illegalEscapeSequence(int lineNumber){
     printf("%s", KWHT);
 }
 
-void unexpectedNewLine(int lineNumber){
+void unexpectedEndOfLine(int lineNumber){
     printf("%sERROR: unexpected '\\n' at line %d\n", KYEL, lineNumber);
     printf("%s", KWHT);
 }
@@ -25,6 +25,11 @@ void malformedBinary(int lineNumber, char* number){
 
 void malformedScientific(int lineNumber, char* number){
     printf("%sERROR: malformed scientific number at line %d: expected number after \"%s\"\n", KYEL, lineNumber, number);
+    printf("%s", KWHT);
+}
+
+void unknownComponent(int lineNumber) {
+    printf("%sERROR: unknown component at line %d\n", KRED, lineNumber);
     printf("%s", KWHT);
 }
 
