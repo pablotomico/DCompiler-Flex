@@ -24,5 +24,5 @@
 #define ANDEQUAL 418
 #define OROR 419
 #define OREQUAL 420
-#define NOTEQUAL 421
-#define DOCCOMMENT 422
+#define DOCCOMMENT 421
+#define NOTEQUAL 422
